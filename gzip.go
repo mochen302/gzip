@@ -35,7 +35,7 @@ func (g *gzipWriter) WriteString(s string) (int, error) {
 	if g.tryCompress(int32(len(s))) {
 		return g.writer.Write([]byte(s))
 	} else {
-		return g.Write([]byte(s))
+		return g.ResponseWriter.Write([]byte(s))
 	}
 }
 
@@ -43,7 +43,7 @@ func (g *gzipWriter) Write(data []byte) (int, error) {
 	if g.tryCompress(int32(len(data))) {
 		return g.writer.Write(data)
 	} else {
-		return g.Write(data)
+		return g.ResponseWriter.Write(data)
 	}
 }
 
