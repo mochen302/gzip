@@ -35,6 +35,12 @@ func (g *gzipWriter) WriteString(s string) (int, error) {
 	if g.tryCompress(int32(len(s))) {
 		bytes, err := g.writer.Write([]byte(s))
 		if err == nil {
+			defer func() {
+				if err := recover(); err != nil {
+					//ignore
+				}
+				_ = g.writer.Close()
+			}()
 			g.ResponseWriter.WriteHeaderNow()
 		}
 		return bytes, err
@@ -47,6 +53,12 @@ func (g *gzipWriter) Write(data []byte) (int, error) {
 	if g.tryCompress(int32(len(data))) {
 		bytes, err := g.writer.Write(data)
 		if err == nil {
+			defer func() {
+				if err := recover(); err != nil {
+					//ignore
+				}
+				_ = g.writer.Close()
+			}()
 			g.ResponseWriter.WriteHeaderNow()
 		}
 		return bytes, err
@@ -67,13 +79,6 @@ func (g *gzipWriter) tryCompress(currentLength int32) bool {
 		} else {
 			g.tryWriteHeaders()
 			g.writer = writer
-
-			defer func() {
-				if err := recover(); err != nil {
-					//ignore
-				}
-				_ = writer.Close()
-			}()
 		}
 	}
 
