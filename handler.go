@@ -28,13 +28,16 @@ func (g *gzipHandler) Handle(c *gin.Context) {
 		fn(c)
 	}
 
-	forceCompress := g.shouldCompress(c.Request)
-	c.Writer = &gzipWriter{
+	needCompress := g.shouldCompress(c.Request)
+	gzipWriter := &gzipWriter{
 		compressMinLength: g.ResponseCompressMinLength,
 		ResponseWriter:    c.Writer,
 		compressLevel:     g.CompressLevel,
-		forceCompress:     forceCompress,
+		needCompress:      needCompress,
 	}
+	c.Writer = gzipWriter
+
+	defer gzipWriter.flushThenClose()
 
 	c.Next()
 }

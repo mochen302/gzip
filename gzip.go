@@ -20,7 +20,7 @@ func Gzip(level int, options ...Option) gin.HandlerFunc {
 
 type gzipWriter struct {
 	compressMinLength int32
-	forceCompress     bool
+	needCompress      bool
 
 	alreadyWriteLength int32
 	isCompress         bool
@@ -35,12 +35,6 @@ func (g *gzipWriter) WriteString(s string) (int, error) {
 	if g.tryCompress(int32(len(s))) {
 		bytes, err := g.writer.Write([]byte(s))
 		if err == nil {
-			defer func() {
-				if err := recover(); err != nil {
-					//ignore
-				}
-				_ = g.writer.Close()
-			}()
 			g.ResponseWriter.WriteHeaderNow()
 		}
 		return bytes, err
@@ -53,12 +47,6 @@ func (g *gzipWriter) Write(data []byte) (int, error) {
 	if g.tryCompress(int32(len(data))) {
 		bytes, err := g.writer.Write(data)
 		if err == nil {
-			defer func() {
-				if err := recover(); err != nil {
-					//ignore
-				}
-				_ = g.writer.Close()
-			}()
 			g.ResponseWriter.WriteHeaderNow()
 		}
 		return bytes, err
@@ -67,10 +55,23 @@ func (g *gzipWriter) Write(data []byte) (int, error) {
 	}
 }
 
+func (g *gzipWriter) flushThenClose() {
+	if !g.isCompress {
+		return
+	}
+
+	defer func() {
+		if err := recover(); err != nil {
+			//ignore
+		}
+		_ = g.writer.Close()
+	}()
+}
+
 func (g *gzipWriter) tryCompress(currentLength int32) bool {
 	g.alreadyWriteLength = currentLength
 
-	if g.alreadyWriteLength >= g.compressMinLength && g.forceCompress {
+	if g.alreadyWriteLength >= g.compressMinLength && g.needCompress {
 		g.isCompress = true
 
 		writer, err := gzip.NewWriterLevel(ioutil.Discard, g.compressLevel)
