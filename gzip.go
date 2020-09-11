@@ -50,7 +50,7 @@ func (g *gzipWriter) Write(data []byte) (int, error) {
 func (g *gzipWriter) tryCompress(currentLength int32) bool {
 	g.alreadyWriteLength = currentLength
 
-	if g.alreadyWriteLength >= g.compressMinLength || g.forceCompress {
+	if g.alreadyWriteLength >= g.compressMinLength && g.forceCompress {
 		g.isCompress = true
 
 		writer, err := gzip.NewWriterLevel(ioutil.Discard, g.compressLevel)
