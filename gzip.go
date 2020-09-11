@@ -60,7 +60,7 @@ func (g *gzipWriter) flushThenClose() {
 		return
 	}
 
-	defer func() {
+	func() {
 		if err := recover(); err != nil {
 			//ignore
 		}
