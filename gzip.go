@@ -42,10 +42,13 @@ func (g *gzipWriter) writeByes0(bytes []byte) (int, error) {
 	if g.tryCompress(int32(len(bytes))) {
 		byteLength, err := g.writer.Write(bytes)
 		if err == nil {
-			//g.alreadyWriteLength = int32(byteLength)
+			g.alreadyWriteLength = int32(byteLength)
 			defer func() {
 				g.tryWriteHeaders()
-				_ = g.writer.Flush()
+				err = g.writer.Flush()
+				if err != nil {
+					fmt.Println(err)
+				}
 			}()
 		}
 		return byteLength, err
@@ -77,7 +80,6 @@ func (g *gzipWriter) tryCompress(currentLength int32) bool {
 		if err != nil {
 			g.isCompress = false
 		} else {
-			g.tryWriteHeaders()
 			g.writer = writer
 		}
 	}
