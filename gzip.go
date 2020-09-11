@@ -79,8 +79,8 @@ func (g *gzipWriter) close() {
 		if err := recover(); err != nil {
 			//ignore
 		}
-		g.tryWriteHeaderWriteLength()
 		_ = g.writer.Close()
+		g.tryWriteHeaderWriteLength()
 	}()
 }
 
@@ -103,7 +103,7 @@ func (g *gzipWriter) tryCompress(currentLength int32) bool {
 
 // Fix: https://github.com/mholt/caddy/issues/38
 func (g *gzipWriter) WriteHeader(code int) {
-	g.tryWriteHeaders()
+	g.ResponseWriter.Header().Del("Content-Length")
 	g.ResponseWriter.WriteHeader(code)
 }
 
