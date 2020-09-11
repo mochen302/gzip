@@ -33,7 +33,11 @@ type gzipWriter struct {
 
 func (g *gzipWriter) WriteString(s string) (int, error) {
 	if g.tryCompress(int32(len(s))) {
-		return g.writer.Write([]byte(s))
+		bytes, err := g.writer.Write([]byte(s))
+		if err == nil {
+			g.ResponseWriter.WriteHeaderNow()
+		}
+		return bytes, err
 	} else {
 		return g.ResponseWriter.Write([]byte(s))
 	}
@@ -41,7 +45,11 @@ func (g *gzipWriter) WriteString(s string) (int, error) {
 
 func (g *gzipWriter) Write(data []byte) (int, error) {
 	if g.tryCompress(int32(len(data))) {
-		return g.writer.Write(data)
+		bytes, err := g.writer.Write(data)
+		if err == nil {
+			g.ResponseWriter.WriteHeaderNow()
+		}
+		return bytes, err
 	} else {
 		return g.ResponseWriter.Write(data)
 	}
