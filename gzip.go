@@ -64,7 +64,6 @@ func (g *gzipWriter) flush() {
 	if !g.isCompress {
 		return
 	}
-	g.tryWriteHeaders()
 	err := g.writer.Flush()
 	if err != nil {
 		fmt.Println(err)
@@ -81,6 +80,7 @@ func (g *gzipWriter) close() {
 			//ignore
 		}
 		_ = g.writer.Close()
+		g.tryWriteHeaderWriteLength()
 	}()
 }
 
@@ -112,7 +112,12 @@ func (g *gzipWriter) tryWriteHeaders() {
 		header := g.ResponseWriter.Header()
 		header.Set("Content-Encoding", "gzip")
 		header.Set("Vary", "Accept-Encoding")
+	}
+}
+
+func (g *gzipWriter) tryWriteHeaderWriteLength() {
+	if g.isCompress {
+		header := g.ResponseWriter.Header()
 		header.Set("Content-Length", fmt.Sprint(g.alreadyWriteLength))
-		g.ResponseWriter.WriteHeaderNow()
 	}
 }
