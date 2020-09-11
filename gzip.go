@@ -3,9 +3,8 @@ package gzip
 import (
 	"compress/gzip"
 	"fmt"
-	"io/ioutil"
-
 	"github.com/gin-gonic/gin"
+	"io/ioutil"
 )
 
 const (
@@ -53,20 +52,20 @@ func (g *gzipWriter) tryCompress(currentLength int32) bool {
 
 	if g.alreadyWriteLength >= g.compressMinLength || g.forceCompress {
 		g.isCompress = true
-	}
 
-	writer, err := gzip.NewWriterLevel(ioutil.Discard, g.compressLevel)
-	if err != nil {
-		g.isCompress = false
-	} else {
-		g.writer = writer
+		writer, err := gzip.NewWriterLevel(ioutil.Discard, g.compressLevel)
+		if err != nil {
+			g.isCompress = false
+		} else {
+			g.writer = writer
 
-		defer func() {
-			if err := recover(); err != nil {
-				//ignore
-			}
-			_ = writer.Close()
-		}()
+			defer func() {
+				if err := recover(); err != nil {
+					//ignore
+				}
+				_ = writer.Close()
+			}()
+		}
 	}
 
 	return g.isCompress
