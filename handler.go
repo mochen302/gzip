@@ -37,7 +37,7 @@ func (g *gzipHandler) Handle(c *gin.Context) {
 	}
 	c.Writer = gzipWriter
 
-	defer gzipWriter.flushThenClose()
+	defer gzipWriter.close()
 
 	c.Next()
 }

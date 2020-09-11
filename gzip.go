@@ -31,25 +31,28 @@ type gzipWriter struct {
 }
 
 func (g *gzipWriter) WriteString(s string) (int, error) {
-	return g.writeByes0([]byte(s))
+	byes0, err := g.writeByes0([]byte(s))
+	if err == nil {
+		defer g.flush()
+	}
+	return byes0, err
 }
 
 func (g *gzipWriter) Write(data []byte) (int, error) {
-	return g.writeByes0(data)
+	byes0, err := g.writeByes0(data)
+	if err == nil {
+		defer g.flush()
+	}
+	return byes0, err
 }
 
 func (g *gzipWriter) writeByes0(bytes []byte) (int, error) {
 	if g.tryCompress(int32(len(bytes))) {
+		g.tryWriteHeaders()
+
 		byteLength, err := g.writer.Write(bytes)
 		if err == nil {
 			g.alreadyWriteLength = int32(byteLength)
-			defer func() {
-				g.tryWriteHeaders()
-				err = g.writer.Flush()
-				if err != nil {
-					fmt.Println(err)
-				}
-			}()
 		}
 		return byteLength, err
 	} else {
@@ -57,7 +60,18 @@ func (g *gzipWriter) writeByes0(bytes []byte) (int, error) {
 	}
 }
 
-func (g *gzipWriter) flushThenClose() {
+func (g *gzipWriter) flush() {
+	if !g.isCompress {
+		return
+	}
+	g.tryWriteHeaders()
+	err := g.writer.Flush()
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
+func (g *gzipWriter) close() {
 	if !g.isCompress {
 		return
 	}
@@ -99,5 +113,6 @@ func (g *gzipWriter) tryWriteHeaders() {
 		header.Set("Content-Encoding", "gzip")
 		header.Set("Vary", "Accept-Encoding")
 		header.Set("Content-Length", fmt.Sprint(g.alreadyWriteLength))
+		g.ResponseWriter.WriteHeaderNow()
 	}
 }
