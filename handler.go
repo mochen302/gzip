@@ -1,34 +1,21 @@
 package gzip
 
 import (
-	"compress/gzip"
-	"fmt"
-	"io/ioutil"
+	"github.com/gin-gonic/gin"
 	"net/http"
 	"path/filepath"
 	"strings"
-	"sync"
-
-	"github.com/gin-gonic/gin"
 )
 
 type gzipHandler struct {
 	*Options
-	gzPool sync.Pool
+	CompressLevel int
 }
 
 func newGzipHandler(level int, options ...Option) *gzipHandler {
-	var gzPool sync.Pool
-	gzPool.New = func() interface{} {
-		gz, err := gzip.NewWriterLevel(ioutil.Discard, level)
-		if err != nil {
-			panic(err)
-		}
-		return gz
-	}
 	handler := &gzipHandler{
-		Options: DefaultOptions,
-		gzPool:  gzPool,
+		Options:       DefaultOptions,
+		CompressLevel: level,
 	}
 	for _, setter := range options {
 		setter(handler.Options)
@@ -37,26 +24,18 @@ func newGzipHandler(level int, options ...Option) *gzipHandler {
 }
 
 func (g *gzipHandler) Handle(c *gin.Context) {
-	if fn := g.DecompressFn; fn != nil && c.Request.Header.Get("Content-Encoding") == "gzip" {
+	if fn := g.DecompressFn; fn != nil {
 		fn(c)
 	}
 
-	if !g.shouldCompress(c.Request) {
-		return
+	forceCompress := g.shouldCompress(c.Request)
+	c.Writer = &gzipWriter{
+		compressMinLength: g.ResponseCompressMinLength,
+		ResponseWriter:    c.Writer,
+		compressLevel:     g.CompressLevel,
+		forceCompress:     forceCompress,
 	}
 
-	gz := g.gzPool.Get().(*gzip.Writer)
-	defer g.gzPool.Put(gz)
-	defer gz.Reset(ioutil.Discard)
-	gz.Reset(c.Writer)
-
-	c.Header("Content-Encoding", "gzip")
-	c.Header("Vary", "Accept-Encoding")
-	c.Writer = &gzipWriter{c.Writer, gz}
-	defer func() {
-		gz.Close()
-		c.Header("Content-Length", fmt.Sprint(c.Writer.Size()))
-	}()
 	c.Next()
 }
 

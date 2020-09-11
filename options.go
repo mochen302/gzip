@@ -9,6 +9,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const (
+	DecompressHeader      = "X-PUZZLE-COMPRESS"
+	DecompressHeaderValue = "gzip"
+)
+
 var (
 	DefaultExcludedExtentions = NewExcludedExtensions([]string{
 		".png", ".gif", ".jpeg", ".jpg",
@@ -19,10 +24,11 @@ var (
 )
 
 type Options struct {
-	ExcludedExtensions   ExcludedExtensions
-	ExcludedPaths        ExcludedPaths
-	ExcludedPathesRegexs ExcludedPathesRegexs
-	DecompressFn         func(c *gin.Context)
+	ExcludedExtensions        ExcludedExtensions
+	ExcludedPaths             ExcludedPaths
+	ExcludedPathesRegexs      ExcludedPathesRegexs
+	ResponseCompressMinLength int32
+	DecompressFn              func(c *gin.Context)
 }
 
 type Option func(*Options)
@@ -102,9 +108,19 @@ func (e ExcludedPathesRegexs) Contains(requestURI string) bool {
 }
 
 func DefaultDecompressHandle(c *gin.Context) {
+	DefaultDecompressHandleWithHeader(c, DecompressHeader, DecompressHeaderValue)
+}
+
+func DefaultDecompressHandleWithHeader(c *gin.Context, header, expectHeaderValue string) {
 	if c.Request.Body == nil {
 		return
 	}
+
+	headerValue := c.Request.Header.Get(header)
+	if headerValue != expectHeaderValue {
+		return
+	}
+
 	r, err := gzip.NewReader(c.Request.Body)
 	if err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
