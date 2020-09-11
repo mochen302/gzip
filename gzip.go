@@ -32,28 +32,26 @@ type gzipWriter struct {
 }
 
 func (g *gzipWriter) WriteString(s string) (int, error) {
-	if g.tryCompress(int32(len(s))) {
-		bytes, err := g.writer.Write([]byte(s))
-		if err == nil {
-			_ = g.writer.Flush()
-			g.ResponseWriter.WriteHeaderNow()
-		}
-		return bytes, err
-	} else {
-		return g.ResponseWriter.Write([]byte(s))
-	}
+	return g.writeByes0([]byte(s))
 }
 
 func (g *gzipWriter) Write(data []byte) (int, error) {
-	if g.tryCompress(int32(len(data))) {
-		bytes, err := g.writer.Write(data)
+	return g.writeByes0(data)
+}
+
+func (g *gzipWriter) writeByes0(bytes []byte) (int, error) {
+	if g.tryCompress(int32(len(bytes))) {
+		byteLength, err := g.writer.Write(bytes)
 		if err == nil {
-			_ = g.writer.Flush()
-			g.ResponseWriter.WriteHeaderNow()
+			g.alreadyWriteLength = int32(byteLength)
+			defer func() {
+				g.tryWriteHeaders()
+				_ = g.writer.Flush()
+			}()
 		}
-		return bytes, err
+		return byteLength, err
 	} else {
-		return g.ResponseWriter.Write(data)
+		return g.ResponseWriter.Write(bytes)
 	}
 }
 
