@@ -79,8 +79,8 @@ func (g *gzipWriter) close() {
 		if err := recover(); err != nil {
 			//ignore
 		}
-		_ = g.writer.Close()
 		g.tryWriteHeaderWriteLength()
+		_ = g.writer.Close()
 	}()
 }
 
