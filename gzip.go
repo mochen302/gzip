@@ -57,6 +57,7 @@ func (g *gzipWriter) tryCompress(currentLength int32) bool {
 		if err != nil {
 			g.isCompress = false
 		} else {
+			g.tryWriteHeaders()
 			g.writer = writer
 
 			defer func() {
@@ -73,11 +74,15 @@ func (g *gzipWriter) tryCompress(currentLength int32) bool {
 
 // Fix: https://github.com/mholt/caddy/issues/38
 func (g *gzipWriter) WriteHeader(code int) {
+	g.tryWriteHeaders()
+	g.ResponseWriter.WriteHeader(code)
+}
+
+func (g *gzipWriter) tryWriteHeaders() {
 	if g.isCompress {
 		header := g.ResponseWriter.Header()
 		header.Set("Content-Encoding", "gzip")
 		header.Set("Vary", "Accept-Encoding")
 		header.Set("Content-Length", fmt.Sprint(g.alreadyWriteLength))
 	}
-	g.ResponseWriter.WriteHeader(code)
 }

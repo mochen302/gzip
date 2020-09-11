@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	DecompressHeader      = "X-PUZZLE-COMPRESS"
+	DecompressHeader      = "X-Puzzle-Compress"
 	DecompressHeaderValue = "gzip"
 )
 
