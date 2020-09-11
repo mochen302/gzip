@@ -4,7 +4,6 @@ import (
 	"compress/gzip"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"io/ioutil"
 )
 
 const (
@@ -74,7 +73,7 @@ func (g *gzipWriter) tryCompress(currentLength int32) bool {
 	if g.alreadyWriteLength >= g.compressMinLength && g.needCompress {
 		g.isCompress = true
 
-		writer, err := gzip.NewWriterLevel(ioutil.Discard, g.compressLevel)
+		writer, err := gzip.NewWriterLevel(g.ResponseWriter, g.compressLevel)
 		if err != nil {
 			g.isCompress = false
 		} else {
