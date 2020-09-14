@@ -1,4 +1,4 @@
-module github.com/mochen302/gzipx
+module github.com/mochen302/gzip
 
 go 1.12
 
