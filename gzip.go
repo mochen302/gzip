@@ -62,6 +62,9 @@ func (g *gzipWriter) close() {
 			//ignore
 		}
 
+		g.tryWriteHeaderWriteLength()
+		g.ResponseWriter.WriteHeaderNow()
+
 		err := g.writer.Flush()
 		if err != nil {
 			fmt.Println(err)
@@ -71,9 +74,6 @@ func (g *gzipWriter) close() {
 		if err != nil {
 			fmt.Println(err)
 		}
-
-		g.tryWriteHeaderWriteLength()
-
 	}()
 }
 
