@@ -31,14 +31,14 @@ type gzipWriter struct {
 }
 
 func (g *gzipWriter) WriteString(s string) (int, error) {
-	return g.writeByes0([]byte(s))
+	return g.writeBytes0([]byte(s))
 }
 
 func (g *gzipWriter) Write(data []byte) (int, error) {
-	return g.writeByes0(data)
+	return g.writeBytes0(data)
 }
 
-func (g *gzipWriter) writeByes0(bytes []byte) (int, error) {
+func (g *gzipWriter) writeBytes0(bytes []byte) (int, error) {
 	if g.tryCompress(int32(len(bytes))) {
 		g.tryWriteHeaders()
 
@@ -102,6 +102,7 @@ func (g *gzipWriter) WriteHeader(code int) {
 
 func (g *gzipWriter) tryWriteHeaders() {
 	if g.isCompress {
+		g.ResponseWriter.WriteHeaderNow()
 		header := g.ResponseWriter.Header()
 		header.Set("Content-Encoding", "gzip")
 		header.Set("Vary", "Accept-Encoding")

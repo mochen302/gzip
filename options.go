@@ -24,11 +24,11 @@ var (
 )
 
 type Options struct {
-	ExcludedExtensions        ExcludedExtensions
-	ExcludedPaths             ExcludedPaths
-	ExcludedPathesRegexs      ExcludedPathesRegexs
-	ResponseCompressMinLength int32
-	DecompressFn              func(c *gin.Context)
+	ExcludedExtensions            ExcludedExtensions
+	ExcludedPaths                 ExcludedPaths
+	ExcludedPathesRegexs          ExcludedPathesRegexs
+	FuncResponseCompressMinLength func() int32
+	DecompressFn                  func(c *gin.Context)
 }
 
 type Option func(*Options)

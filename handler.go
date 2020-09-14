@@ -30,7 +30,7 @@ func (g *gzipHandler) Handle(c *gin.Context) {
 
 	needCompress := g.shouldCompress(c.Request)
 	gzipWriter := &gzipWriter{
-		compressMinLength: g.ResponseCompressMinLength,
+		compressMinLength: g.FuncResponseCompressMinLength(),
 		ResponseWriter:    c.Writer,
 		compressLevel:     g.CompressLevel,
 		needCompress:      needCompress,

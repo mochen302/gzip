@@ -260,3 +260,21 @@ func TestDecompressGzipWithIncorrectData(t *testing.T) {
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
+
+func TestGzip2(t *testing.T) {
+	buf := &bytes.Buffer{}
+	gz, _ := gzip.NewWriterLevel(buf, gzip.DefaultCompression)
+	if _, err := gz.Write([]byte(testResponse)); err != nil {
+		gz.Close()
+		t.Fatal(err)
+	}
+	gz.Close()
+
+	reader, err := gzip.NewReader(buf)
+	if err != nil {
+		panic(err)
+	}
+
+	readAll, _ := ioutil.ReadAll(reader)
+	fmt.Println(string(readAll))
+}

@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/mochen302/gzipx"
+	"github.com/mochen302/gzip"
 )
 
 func main() {
