@@ -61,11 +61,19 @@ func (g *gzipWriter) close() {
 		if err := recover(); err != nil {
 			//ignore
 		}
-		err := g.writer.Close()
+
+		err := g.writer.Flush()
 		if err != nil {
 			fmt.Println(err)
 		}
+
+		err = g.writer.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+
 		g.tryWriteHeaderWriteLength()
+
 	}()
 }
 
