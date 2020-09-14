@@ -202,10 +202,10 @@ func TestDecompressGzip(t *testing.T) {
 	router := gin.New()
 	router.Use(Gzip(DefaultCompression, WithDecompressFn(DefaultDecompressHandle)))
 	router.POST("/", func(c *gin.Context) {
-		if v := c.Request.Header.Get("Content-Encoding"); v != "" {
+		if v := c.Request.Header.Get("Content-Encoding"); v == "" {
 			t.Errorf("unexpected `Content-Encoding`: %s header", v)
 		}
-		if v := c.Request.Header.Get("Content-Length"); v != "" {
+		if v := c.Request.Header.Get("Content-Length"); v == "" {
 			t.Errorf("unexpected `Content-Length`: %s header", v)
 		}
 		data, err := c.GetRawData()

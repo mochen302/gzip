@@ -31,19 +31,11 @@ type gzipWriter struct {
 }
 
 func (g *gzipWriter) WriteString(s string) (int, error) {
-	byes0, err := g.writeByes0([]byte(s))
-	if err == nil {
-		defer g.flush()
-	}
-	return byes0, err
+	return g.writeByes0([]byte(s))
 }
 
 func (g *gzipWriter) Write(data []byte) (int, error) {
-	byes0, err := g.writeByes0(data)
-	if err == nil {
-		defer g.flush()
-	}
-	return byes0, err
+	return g.writeByes0(data)
 }
 
 func (g *gzipWriter) writeByes0(bytes []byte) (int, error) {
@@ -60,16 +52,6 @@ func (g *gzipWriter) writeByes0(bytes []byte) (int, error) {
 	}
 }
 
-func (g *gzipWriter) flush() {
-	if !g.isCompress {
-		return
-	}
-	err := g.writer.Flush()
-	if err != nil {
-		fmt.Println(err)
-	}
-}
-
 func (g *gzipWriter) close() {
 	if !g.isCompress {
 		return
@@ -79,7 +61,10 @@ func (g *gzipWriter) close() {
 		if err := recover(); err != nil {
 			//ignore
 		}
-		_ = g.writer.Close()
+		err := g.writer.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
 		g.tryWriteHeaderWriteLength()
 	}()
 }
