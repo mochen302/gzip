@@ -1,17 +1,18 @@
 package main
 
 import (
+	"compress/gzip"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"time"
 
-	"github.com/mochen302/gzip"
+	"github.com/mochen302/gzipx"
 )
 
 func main() {
 	r := gin.Default()
-	r.Use(gzip.Gzip(gzip.DefaultCompression))
+	r.Use(gzipx.Gzip(gzip.DefaultCompression))
 	r.GET("/ping", func(c *gin.Context) {
 		c.String(http.StatusOK, "pong "+fmt.Sprint(time.Now().Unix()))
 	})

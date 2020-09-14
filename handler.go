@@ -1,4 +1,4 @@
-package gzip
+package gzipx
 
 import (
 	"github.com/gin-gonic/gin"
