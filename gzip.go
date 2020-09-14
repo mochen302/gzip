@@ -113,7 +113,6 @@ func (g *gzipWriter) WriteHeader(code int) {
 
 func (g *gzipWriter) tryWriteHeaders() {
 	if g.isCompress {
-		g.ResponseWriter.WriteHeaderNow()
 		header := g.ResponseWriter.Header()
 		header.Set("Content-Encoding", "gzip")
 		header.Set("Vary", "Accept-Encoding")
