@@ -2,7 +2,6 @@ package gzipx
 
 import (
 	"compress/gzip"
-	"net/http"
 	"regexp"
 	"strings"
 
@@ -123,9 +122,9 @@ func DefaultDecompressHandleWithHeader(c *gin.Context, header, expectHeaderValue
 
 	r, err := gzip.NewReader(c.Request.Body)
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
+
 	c.Request.Header.Del("Content-Encoding")
 	c.Request.Header.Del("Content-Length")
 	c.Request.Body = r
