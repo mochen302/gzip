@@ -85,6 +85,7 @@ func (g *gzipWriter) close() {
 		if err != nil {
 			fmt.Println(err)
 		}
+
 	}()
 }
 

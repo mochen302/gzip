@@ -11,6 +11,7 @@ import (
 const (
 	DecompressHeader      = "X-Puzzle-Compress"
 	DecompressHeaderValue = "gzip"
+	DecompressReader      = "X-Puzzle-Compress-Reader"
 )
 
 var (
@@ -126,7 +127,25 @@ func DefaultDecompressHandleWithHeader(c *gin.Context, header, expectHeaderValue
 		return
 	}
 
+	c.Set(DecompressReader, r)
+
 	c.Request.Header.Del("Content-Encoding")
 	c.Request.Header.Del("Content-Length")
 	c.Request.Body = r
 }
+
+//func GetReader() *gzip.Reader {
+//	buf := &bytes.Buffer{}
+//	gz, _ := gzip.NewWriterLevel(buf, gzip.DefaultCompression)
+//	if _, err := gz.Write([]byte("this is test")); err != nil {
+//		gz.Close()
+//	}
+//	defer gz.Close()
+//
+//	reader, err := gzip.NewReader(buf)
+//	if err != nil {
+//		panic(err)
+//	}
+//
+//	return reader
+//}

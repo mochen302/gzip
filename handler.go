@@ -1,6 +1,7 @@
 package gzipx
 
 import (
+	"compress/gzip"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"path/filepath"
@@ -29,8 +30,13 @@ func (g *gzipHandler) Handle(c *gin.Context) {
 	}
 
 	needCompress := g.shouldCompress(c.Request)
+	compressMinLength := int32(2000000000)
+	if g.FuncResponseCompressMinLength != nil {
+		compressMinLength = g.FuncResponseCompressMinLength()
+	}
+
 	gzipWriter := &gzipWriter{
-		compressMinLength: g.FuncResponseCompressMinLength(),
+		compressMinLength: compressMinLength,
 		ResponseWriter:    c.Writer,
 		compressLevel:     g.CompressLevel,
 		needCompress:      needCompress,
@@ -38,6 +44,19 @@ func (g *gzipHandler) Handle(c *gin.Context) {
 	c.Writer = gzipWriter
 
 	defer gzipWriter.close()
+
+	if reader, exists := c.Get(DecompressReader); exists {
+		gzipReader := reader.(*gzip.Reader)
+		defer func() {
+			if err := recover(); err != nil {
+				println(err)
+			}
+			err := gzipReader.Close()
+			if err != nil {
+				println(err)
+			}
+		}()
+	}
 
 	c.Next()
 }
