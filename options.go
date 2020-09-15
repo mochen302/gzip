@@ -122,6 +122,7 @@ func DefaultDecompressHandleWithHeader(c *gin.Context, header, expectHeaderValue
 
 	r, err := gzip.NewReader(c.Request.Body)
 	if err != nil {
+		println(err)
 		return
 	}
 
